@@ -12,7 +12,8 @@ Class {
 		'lastEffect',
 		'lastCard',
 		'playersCards',
-		'cardsActivated'
+		'cardsActivated',
+		'typeOfRound'
 	],
 	#category : #'IngSoft2-Model'
 }
@@ -69,8 +70,9 @@ Match >> cardsTargeting: aPlayer [
 ]
 
 { #category : #playing }
-Match >> changeTurn [
-	playerIndex := (playerIndex rem: players size) + 1
+Match >> changeTurn: anAmountOfNumbers [
+	playerIndex := ((playerIndex + anAmountOfNumbers - 1) % players size) + 1
+	
 ]
 
 { #category : #playing }
@@ -95,7 +97,8 @@ Match >> initializePlayedBy: thePlayers throwing: theDices during: aNumberOfLaps
 	cardsActivated := Dictionary new.
 	playersCards := Dictionary new.
 	lastCard := NoneCard new.
-	lastEffect := players first -> NoEffect new
+	lastEffect := players first -> NoEffect new.
+	typeOfRound := NormalRound new.
 ]
 
 { #category : #accessing }
@@ -183,8 +186,11 @@ Match >> playedBy: aPlayer [
 	self assertIsPlaying: aPlayer.
 	self assertMatchHasEnded.
 	self move: aPlayer.
-	board applyEffectOf: (self positionOf: aPlayer) currentSpace in: self activatedBy: aPlayer.
-	self changeTurn
+	board
+		applyEffectOf: (self positionOf: aPlayer) currentSpace
+		in: self
+		activatedBy: aPlayer.
+	typeOfRound nextPlayer: self with: 1
 ]
 
 { #category : #accessing }
@@ -216,10 +222,12 @@ Match >> removeActivated: card [
 
 { #category : #playing }
 Match >> throwDicesAndApplyCardsBy: aPlayer [
-	| roll |
-	roll := aPlayer throw: dices.
-	(self cardsTargeting: aPlayer) do: [ :card | roll := card affectDiceRoll: roll ].
-	^ roll
+	^ (self cardsTargeting: aPlayer) inject: (aPlayer throw: dices) into: [ :roll :card | card affectDiceRoll: roll ]
+]
+
+{ #category : #accessing }
+Match >> typeOfRound [
+	^typeOfRound 
 ]
 
 { #category : #updating }
@@ -230,6 +238,11 @@ Match >> updateLastCard: aCard [
 { #category : #updating }
 Match >> updateLastEffect: anEffectToPlayer [
 	lastEffect := anEffectToPlayer
+]
+
+{ #category : #updating }
+Match >> updateTypeOfRound: aTypeOfRound [
+	typeOfRound := aTypeOfRound 
 ]
 
 { #category : #accessing }

@@ -26,6 +26,31 @@ CardTest >> playerNamedMartin [
 	^ Player named: 'Martin'
 ]
 
+{ #category : #testsTurnCards }
+CardTest >> testOnePlayerPlaysADoubleTurnAndOtherPlayerPlaysSkipCard [
+	| juan jose martin board dice deck match skipCard doubleCard |
+	juan := self playerNamedJuan .
+	jose := self playerNamedJose .
+	martin := self playerNamedMartin .
+	board := self boardWith10SpacesWithoutEffects.
+	doubleCard := DoubleCard new.
+	skipCard := SkipCard new.
+	deck := Deck
+		deterministicWithCardSequence:
+			{doubleCard .
+			skipCard}.
+	dice := Dice deterministicWithFaces: 6 throwing: {1}.
+	match := Match playedBy: { juan . jose . martin} throwing: { dice }  during: 1 on: board dealingFrom: deck.
+	match play: doubleCard by: juan.
+	self assert: (match cardsOf: juan) equals: skipCard asOrderedCollection. 
+	match play: skipCard  by: jose.
+	self assert: (match cardsOf: jose) equals: doubleCard asOrderedCollection. 
+	match playedBy: jose.
+	self assert: (match positionOf: jose) currentSpace equals: 2 
+	
+	
+]
+
 { #category : #'tests-permanentCards' }
 CardTest >> testPlayerPlaysAccelerationCard [
 	| juan board dice deck match accelerationCard martin jose speedCard |
@@ -767,6 +792,25 @@ CardTest >> testPlayerPlaysSpeedCard [
 	self assert: (match cardsOf: juan) equals: speedCard asOrderedCollection.
 	match playedBy: juan.
 	self assert: (match positionOf: juan) currentSpace equals: 7
+]
+
+{ #category : #testsTurnCards }
+CardTest >> testPlayerPlaysTwoDoubleCardsInARow [
+	| juan jose board dice deck match doubleCard |
+	juan := self playerNamedJuan.
+	jose := self playerNamedJose.
+	board := self boardWith10SpacesWithoutEffects.
+	doubleCard := DoubleCard new.
+	deck := Deck
+		deterministicWithCardSequence:
+			{doubleCard}.
+	dice := Dice deterministicWithFaces: 6 throwing: {1}.
+	match := Match playedBy: { juan . jose } throwing: { dice }  during: 1 on: board dealingFrom: deck.
+	match play: doubleCard  by: juan.
+	match play: doubleCard  by: juan.
+	self assert: (match cardsOf: juan) isEmpty.
+	match playedBy: juan.  
+	self assert: (match positionOf: juan) currentSpace equals: 4
 ]
 
 { #category : #'tests-cancellationCard' }

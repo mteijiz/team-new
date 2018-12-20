@@ -232,9 +232,7 @@ CardTest >> testPlayerPlaysDoubleCard [
 	juan := self playerNamedJuan .
 	jose := self playerNamedJose .
 	martin := self playerNamedMartin .
-	board := Board
-		withSpaces: 10
-		andDeterministicEffectsGeneratedFrom: {NoEffect new}.
+	board := self boardWith10SpacesWithoutEffects.
 	doubleCard := DoubleCard new.
 	speedCard := SpeedCard new.
 	deck := Deck
@@ -243,12 +241,13 @@ CardTest >> testPlayerPlaysDoubleCard [
 			speedCard}.
 	dice := Dice deterministicWithFaces: 6 throwing: {1}.
 	match := Match playedBy: { juan . jose . martin} throwing: { dice }  during: 1 on: board dealingFrom: deck.
-	match playedBy: juan.
 	match play: doubleCard by: juan.
 	self assert: (match cardsOf: juan) equals: speedCard asOrderedCollection.
 	match playedBy: juan.
 	self assert: (match positionOf: juan) currentSpace equals: 3.
-	self assert: (match positionOf: jose) currentSpace equals: 1
+	self assert: (match positionOf: jose) currentSpace equals: 1.
+	match playedBy: jose.
+	self assert: (match positionOf: jose) currentSpace equals: 2
 ]
 
 { #category : #'tests-permanentCards' }
@@ -412,17 +411,15 @@ CardTest >> testPlayerPlaysRedoCardRedoingADoubleCard [
 		during: 3
 		on: board
 		dealingFrom: deck.
-	match playedBy: juan.
-	self assert: (match positionOf: juan) currentSpace equals: 3.
 	match play: doubleCard by: juan.
+	self assert: (match positionOf: juan) currentSpace equals: 3.
 	match playedBy: juan.
 	self assert: (match positionOf: juan) currentSpace equals: 6.
-	match playedBy: jose.
-	self assert: (match positionOf: jose) currentSpace equals: 3.
 	match play: redoCard by: juan.
 	self assert: (match cardsOf: juan) isEmpty.
+	self assert: (match positionOf: jose) currentSpace equals: 3.
 	match playedBy: jose.
-	self assert: (match positionOf: juan) currentSpace equals: 6.
+	self assert: (match positionOf: jose) currentSpace equals: 6.
 	
 ]
 
@@ -835,10 +832,9 @@ CardTest >> testPlayersPlaysThreeTurnCards [
 	self assert: (match cardsOf: juan) equals: {juanSkipCard . juanDoubleCard} asOrderedCollection.
 	self assert: (match cardsOf: jose) equals: {joseReverseCard . joseSkipCard} asOrderedCollection.
 	self assert: (match cardsOf: martin) equals: {martinDoubleCard . martinReverseCard  } asOrderedCollection.
-	match playedBy: juan.
-	self assert: (match positionOf: juan) currentSpace equals: 2.
 	match play: juanDoubleCard by: juan.
 	self assert: (match cardsOf: juan) equals: juanSkipCard asOrderedCollection.
+	self assert: (match positionOf: juan) currentSpace equals: 2.
 	match playedBy: juan.
 	self assert: (match positionOf: juan) currentSpace equals: 4.
 	match playedBy: jose.
@@ -853,10 +849,9 @@ CardTest >> testPlayersPlaysThreeTurnCards [
 	self assert: (match positionOf: jose) currentSpace equals: 6.
 	match playedBy: juan.
    self assert: (match positionOf: juan) currentSpace equals: 8.
-	match playedBy: martin.
-	self assert: (match positionOf: martin) currentSpace equals: 2.
 	match play: martinDoubleCard by: martin. 
 	self assert: (match cardsOf: martin) isEmpty.
+	self assert: (match positionOf: martin) currentSpace equals: 2.
 	match playedBy: martin. 
 	self assert: (match positionOf: martin) currentSpace equals: 4.
 	match play: juanSkipCard by: juan.

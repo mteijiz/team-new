@@ -6,12 +6,14 @@ Class {
 
 { #category : #applying }
 DoubleCard >> applyIn: aMatch to: aPlayer [
+	aMatch playedBy: aMatch nextPlayer.
 	aMatch typeOfRound nextPlayer: aMatch with: 1 negated.
 	aMatch updateLastCard: self 
 ]
 
 { #category : #applying }
 DoubleCard >> redoIn: aMatch to: aCard by: aRedoCard [ 
-	aMatch changeTurn: 1 negated.
-	aMatch updateLastCard: aRedoCard
+	aMatch playedBy: aMatch nextPlayer.
+	aMatch typeOfRound nextPlayer: aMatch with: 1 negated.
+	aMatch updateLastCard: self 
 ]
